@@ -1,7 +1,7 @@
 import { Response, Request } from "express";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 import { FLASH_API } from "../../utils/config.js";
-import { z } from "zod";
+import { nullable, z } from "zod";
 
 const ZPrompt = z.object({
   question: z
@@ -13,20 +13,54 @@ const ZPrompt = z.object({
 export default async function gen_location(req: Request, res: Response) {
   const { question } = ZPrompt.parse(req.body);
 
-  const genAI = new GoogleGenerativeAI(FLASH_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  const schema = {
+    description: "Tourist Places",
+    type: SchemaType.OBJECT,
+    properties: {
+      coordinate: {
+        type: SchemaType.ARRAY,
+        items: {
+          type: SchemaType.NUMBER,
+          nullable: false,
+          description: "LAT AND LONG",
+        },
+        description: "co-ordinate of place",
+        nullable: false,
+      },
+      description: {
+        type: SchemaType.STRING,
+        description: "description of place",
+        nullable: false,
+      },
+      title: {
+        type: SchemaType.STRING,
+        description: "title of place",
+        nullable: false,
+      },
+    },
+  };
 
-  const prompt = `For the place related question i ask give me co-ordinate of the place along with title and description
-    Question: ${question}
-    
-    
-    Location = { coordinate: [number, number], title: string, description: string }
-    Return: Location `;
+  const genAI = new GoogleGenerativeAI(FLASH_API);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-1.5-flash",
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: schema,
+    },
+  });
+
+  const prompt = `For the place related question i ask give me co-ordinate of the place along with title and description with the below JSON schema
+    Question: ${question}`;
 
   const result = await model.generateContent(prompt);
-  console.log(result);
+  const data = result.response.text();
+
+  if (!data)
+    return res.status(401).json({ msg: "task failed", success: false });
+
+  console.log(data);
 
   res
     .status(200)
-    .json({ msg: "generated sucessfully sucessfull", sucess: true, result });
+    .json({ msg: "generated sucessfull", sucess: true, data: JSON.parse(data) });
 }
