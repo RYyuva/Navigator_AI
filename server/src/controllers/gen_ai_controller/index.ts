@@ -1,1 +1,1 @@
-export { default as get_locaiton } from "./GetLocation.js";
+export { default as get_location } from "./GetLocation.js";
