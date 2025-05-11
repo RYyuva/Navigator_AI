@@ -1,4 +1,5 @@
 {
+  "homepage":"https://Ryyuva.github.io/Navigator_AI",
   "name": "com-server",
   "version": "1.0.0",
   "main": "dist",
@@ -7,7 +8,9 @@
     "build": "rimraf dist && npx tsc",
     "prestart": "npm run build",
     "start": "node dist",
-    "dev": "concurrently \"npx tsc --watch\" \"npx tsc-alias --watch\" \"nodemon -q dist/src/index.js\""
+    "dev": "concurrently \"npx tsc --watch\" \"npx tsc-alias --watch\" \"nodemon -q dist/src/index.js\"",
+    "predeploy": "npm run build",
+    "deploy":"gh-pages -d build"
   },
   "keywords": [],
   "author": "",
