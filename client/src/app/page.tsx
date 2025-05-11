@@ -21,7 +21,7 @@ interface TMeta {
 }
 
 export default function Home() {
-  const [ll, setLL] = useState<LatLngTuple>([13.08268, 80.270721]);
+  const [ll, setLL] = useState<LatLngTuple>([51.59851648934695,-0.33021007557360366]);
   const [formText, setFormText] = useState<string>("");
   const [meta, setMeta] = useState<TMeta>({ title: "", description: "" });
 

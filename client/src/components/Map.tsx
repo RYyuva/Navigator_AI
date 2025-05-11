@@ -53,7 +53,9 @@ function DraggableMarker({ latlng }: prop) {
       dragend() {
         const marker = markerRef.current;
         if (marker != null) {
-          setPosition([marker.getLatLng().lat, marker.getLatLng().lng]);
+          const newPos = marker.getLatLng();
+          setPosition([newPos.lat, newPos.lng]);
+          map.flyTo(newPos, map.getZoom()); // Ensures the map moves to marker position
         }
       },
     }),
@@ -86,17 +88,22 @@ function DraggableMarker({ latlng }: prop) {
 export default function Map({ latlng }: prop) {
   return (
     <MapContainer
-      center={[13.08268, 80.270721]}
+      center={latlng[0]}
       zoom={13}
       scrollWheelZoom={true}
       className="h-full"
     >
+      {/* Labels layer with full opacity */}
       <TileLayer
-        attribution={
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        }
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
+
+      {/* Satellite layer with lower opacity for transparency */}
+      <TileLayer
+        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        opacity={0.5}
+      />
+
       <DraggableMarker latlng={latlng} />
     </MapContainer>
   );
